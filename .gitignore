@@ -1,0 +1,6 @@
+.stack-work/
+comicspreviews-parser.cabal
+*~
+*.lock
+*.log
+*.key
