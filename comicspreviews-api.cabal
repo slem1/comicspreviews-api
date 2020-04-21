@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2fbca6ceb2417ef606d6e2a3aea7bfd62f3e16c48ca27db295e723ddaf268eac
+-- hash: ae40d70c3693188d2cd9a64e908ef2a65c67bc485c12cad7c0dbbe0f5184a284
 
 name:           comicspreviews-api
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Article
       Lib
   other-modules:
       Paths_comicspreviews_api
@@ -42,6 +43,7 @@ library
     , hspec
     , http-client
     , http-conduit
+    , http-types
     , memory
     , optparse-applicative
     , postgresql-simple
@@ -70,6 +72,7 @@ executable comicspreviews-api-exe
     , hspec
     , http-client
     , http-conduit
+    , http-types
     , memory
     , optparse-applicative
     , postgresql-simple
@@ -99,6 +102,7 @@ test-suite comicspreviews-api-test
     , hspec
     , http-client
     , http-conduit
+    , http-types
     , memory
     , optparse-applicative
     , postgresql-simple

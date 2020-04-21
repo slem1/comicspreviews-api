@@ -37,6 +37,7 @@ dependencies:
 - cryptonite
 - memory
 - utf8-string
+- http-types
 
 library:
   source-dirs: src
