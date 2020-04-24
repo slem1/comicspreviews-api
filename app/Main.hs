@@ -3,13 +3,27 @@ module Main where
 
 import Lib
 import Article
+import JwtMiddleware
 
 import Web.Scotty
+import Network.HTTP.Types.Status
+import Network.Wai.Middleware.HttpAuth
+
+import qualified Data.Configurator as DC
+import Data.Configurator.Types as DC_T
 
 import Data.Monoid (mconcat)
-import Network.HTTP.Types.Status
+import Data.Text
 
-main = scotty 3000 $ do
+import Data.ByteString.UTF8
+import Web.JWT
+
+import Network.Wai.Handler.Warp
+
+main = run 3300 proxiedApp
+ 
+{--  scotty 3000 $ do
+  middleware $ basicAuth (\u p -> return $ u == "michael" && p == "mypass") "My Realm"
   get "/" $ do     
     text "This was a GET request!"     
   delete "/" $ do
@@ -20,6 +34,7 @@ main = scotty 3000 $ do
     text "This was a PUT request!"  
   partJson
   part2
+  --}
 
 
 part2 :: ScottyM () 

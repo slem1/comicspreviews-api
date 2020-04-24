@@ -38,6 +38,11 @@ dependencies:
 - memory
 - utf8-string
 - http-types
+- wai-extra
+- jwt
+- base64-bytestring
+- wai
+- warp
 
 library:
   source-dirs: src

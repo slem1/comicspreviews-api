@@ -57,6 +57,11 @@ extra-deps:
   - memory-0.15.0
   - utf8-string-1.0.1.1  
   - http-types-0.12.3
+  - wai-extra-3.0.29.1
+  - jwt-0.10.0
+  - base64-bytestring-1.0.0.3
+  - wai-3.2.2.1
+  - warp-3.3.10
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
