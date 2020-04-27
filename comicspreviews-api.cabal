@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a97598e41ff0eacb67618b781dc37d05cfc22b5d78ec941f9010f9bf56f12113
+-- hash: ee5958d42591b770e28f1d67e41db7c1adf2d2eb739fe33308913d4808628986
 
 name:           comicspreviews-api
 version:        0.1.0.0
@@ -32,6 +32,8 @@ library
       JwtMiddleware
       Lib
       PropertyUtil
+      UserAccount
+      UserAccountService
   other-modules:
       Paths_comicspreviews_api
   hs-source-dirs:
