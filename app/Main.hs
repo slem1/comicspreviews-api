@@ -19,6 +19,9 @@ import Data.ByteString.UTF8
 import Web.JWT
 
 import Network.Wai.Handler.Warp
+import Database.PostgreSQL.Simple
+
+import PropertyUtil
 
 main = run 3300 proxiedApp
  
@@ -60,3 +63,18 @@ partJson = do
   post "/article" $ do
     article <- jsonData :: ActionM Article
     json article
+
+getConnectionInfo :: DC_T.Config -> IO ConnectInfo
+getConnectionInfo config = do 
+    key <- DC.require config . T.pack $ "key_path"
+    host <- DC.require config . T.pack $ "db_host"
+    port <- DC.require config . T.pack $ "db_port"
+    username <- DC.require config . T.pack $ "db_username"
+    password <- do 
+        encrypted <- DC.require config . T.pack $ "db_password"
+        eDecrypted <- U.decryptProperty encrypted key
+        case eDecrypted of 
+            Left e -> error $ show e
+            Right decrypted -> return decrypted
+    database <- DC.require config . T.pack $ "db_database"
+    return $ ConnectInfo host port username password database

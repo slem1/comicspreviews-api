@@ -1,13 +1,21 @@
-module UserAccountService (    
+{-# LANGUAGE OverloadedStrings #-}
 
+module UserAccountService (    
+    createUserAccount
 ) where
 
-import UserAccount
+import qualified UserAccount as UA
 import Crypto.Hash
+import Database.PostgreSQL.Simple
+import Data.ByteString
+import Data.Int
 
-create :: UserAccount -> String -> IO UserAccount
-create acc rawPassword = "INSERT INTO comicspreviews.user_account ('username', 'email')"
+createUserAccount :: UA.UserAccount -> ByteString -> Connection -> IO UA.UserAccount
+createUserAccount acc rawPassword conn = withTransaction conn $ do    
+    [rid] <- query conn "INSERT INTO comicspreviews.user_account ('username', 'email', 'enabled', 'password') RETURNING id_user_account" (UA.username acc, UA.email acc, True, password rawPassword) :: IO [Only Int64]
+    return $ acc { UA.id = fromOnly rid}    
     where
-        password = hashWith SHA256 password
+        password :: ByteString -> String
+        password pass = show (hashWith SHA256 pass) :: String        
 
 
