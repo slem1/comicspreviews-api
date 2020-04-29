@@ -10,5 +10,6 @@ data UserAccount = UserAccount {
     id :: Int64,
     username :: String,
     email :: String,
-    enabled :: Bool
+    enabled :: Bool, 
+    password :: String
 } deriving (Show)

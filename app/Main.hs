@@ -13,7 +13,7 @@ import qualified Data.Configurator as DC
 import Data.Configurator.Types as DC_T
 
 import Data.Monoid (mconcat)
-import Data.Text
+import qualified Data.Text as T
 
 import Data.ByteString.UTF8
 import Web.JWT
@@ -22,8 +22,16 @@ import Network.Wai.Handler.Warp
 import Database.PostgreSQL.Simple
 
 import PropertyUtil
+import UserAccountService
+import qualified UserAccount as UA
 
-main = run 3300 proxiedApp
+main = do 
+  let user = UA.UserAccount { UA.id= -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False, UA.password = "" }
+  DC.load [DC.Required "application.properties"] >>= getConnectionInfo >>= connect >>= findByUsername "Cyclops"
+  
+
+  
+  --run 3300 proxiedApp
  
 {--  scotty 3000 $ do
   middleware $ basicAuth (\u p -> return $ u == "michael" && p == "mypass") "My Realm"
@@ -64,17 +72,13 @@ partJson = do
     article <- jsonData :: ActionM Article
     json article
 
+
 getConnectionInfo :: DC_T.Config -> IO ConnectInfo
-getConnectionInfo config = do 
-    key <- DC.require config . T.pack $ "key_path"
+getConnectionInfo config = do  
+    key <- DC.require config . T.pack $ "key_path"   
     host <- DC.require config . T.pack $ "db_host"
     port <- DC.require config . T.pack $ "db_port"
     username <- DC.require config . T.pack $ "db_username"
-    password <- do 
-        encrypted <- DC.require config . T.pack $ "db_password"
-        eDecrypted <- U.decryptProperty encrypted key
-        case eDecrypted of 
-            Left e -> error $ show e
-            Right decrypted -> return decrypted
+    password <- getEncryptedProperty config (T.pack "db_password") key         
     database <- DC.require config . T.pack $ "db_database"
     return $ ConnectInfo host port username password database

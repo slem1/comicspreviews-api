@@ -16,3 +16,6 @@ WITH (
 
 CREATE INDEX ix_t_user_account_username ON comicspreviews.t_user_account (username);
 CREATE INDEX ix_t_user_account_email ON comicspreviews.t_user_account (email);
+
+
+ALTER TABLE comicspreviews.t_user_account OWNER to comicspreviews;
