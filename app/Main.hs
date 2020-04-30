@@ -26,7 +26,7 @@ import UserAccountService
 import qualified UserAccount as UA
 
 main = do 
-  let user = UA.UserAccount { UA.id= -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False, UA.password = "" }
+  let user = UA.UserAccount { UA.id= -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False }
   DC.load [DC.Required "application.properties"] >>= getConnectionInfo >>= connect >>= findByUsername "Cyclops"
   
 
