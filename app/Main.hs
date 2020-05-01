@@ -22,7 +22,7 @@ import Network.Wai.Handler.Warp
 import Database.PostgreSQL.Simple
 
 import PropertyUtil
-import UserAccountService
+import UserDAO
 import qualified UserAccount as UA
 
 main = do 
