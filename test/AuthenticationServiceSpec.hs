@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module AuthenticationServiceSpec where
 
 import Data.Text as T
@@ -9,6 +10,9 @@ import Test.HUnit
 import Database.PostgreSQL.Simple
 import PropertyUtil
 import Control.Exception
+import AuthenticationService
+import UserAccountService
+import qualified UserAccount as UA
 
 openConnection :: IO Connection
 openConnection = DC.load [DC.Required "test/misc/test.properties"] >>= getConnectionInfo >>= connect 
@@ -19,11 +23,14 @@ closeConnection = close
 withDatabaseConnection :: (Connection -> IO ()) -> IO ()
 withDatabaseConnection = bracket openConnection closeConnection
 
+testUserAccount = UA.UserAccount { UA.id = -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False}
+
 spec :: Spec
 spec = do 
     around withDatabaseConnection $ do     
         describe "Tests for AuthenticationService module" $ do 
            it "should 0 equals to 0" $ \c -> do        
+                createUserAccount testUserAccount "123456" c
                 0 `shouldBe` 0      
 
 getConnectionInfo :: DC_T.Config -> IO ConnectInfo
