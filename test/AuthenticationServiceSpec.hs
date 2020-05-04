@@ -18,19 +18,25 @@ openConnection :: IO Connection
 openConnection = DC.load [DC.Required "test/misc/test.properties"] >>= getConnectionInfo >>= connect 
 
 closeConnection :: Connection -> IO ()
-closeConnection = close
+closeConnection = close  
 
 withDatabaseConnection :: (Connection -> IO ()) -> IO ()
 withDatabaseConnection = bracket openConnection closeConnection
 
 testUserAccount = UA.UserAccount { UA.id = -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False}
 
+withTransactionRollback :: (Connection -> IO n) -> Connection -> IO n
+withTransactionRollback op c = withTransaction c $ do        
+    r <- op c
+    rollback c
+    return r
+
 spec :: Spec
 spec = do 
     around withDatabaseConnection $ do     
         describe "Tests for AuthenticationService module" $ do 
-           it "should 0 equals to 0" $ \c -> do        
-                createUserAccount testUserAccount "123456" c
+           it "should 0 equals to 0" $ withTransactionRollback $ \c -> do        
+                createUserAccount testUserAccount "123456" c                
                 0 `shouldBe` 0      
 
 getConnectionInfo :: DC_T.Config -> IO ConnectInfo

@@ -25,9 +25,19 @@ import PropertyUtil
 import UserDAO
 import qualified UserAccount as UA
 
-main = do 
-  let user = UA.UserAccount { UA.id= -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False }
-  DC.load [DC.Required "application.properties"] >>= getConnectionInfo >>= connect >>= findByUsername "Cyclops"
+around :: IO a -> (a -> IO ()) -> (a -> IO c) -> IO c
+around first last op = do  
+  p <- first 
+  putStrLn "after first"
+  result <- op p
+  last p
+  return result
+
+main =  around getLine putStrLn (\input -> putStrLn (input ++ "modified by op"))
+  --do
+  --let user = UA.UserAccount { UA.id= -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False }
+  --DC.load [DC.Required "application.properties"] >>= getConnectionInfo >>= connect >>= findByUsername "Cyclops"
+  
   
 
   

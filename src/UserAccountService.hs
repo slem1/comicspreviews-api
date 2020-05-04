@@ -11,5 +11,5 @@ import Data.ByteString
 
 createUserAccount :: UserAccount -> ByteString -> Connection -> IO UserAccount
 createUserAccount account rawPassword conn = let password = hashPassword rawPassword in
-    withTransaction conn $ UserDAO.createUserAccount account password conn 
+    withSavepoint conn $ UserDAO.createUserAccount account password conn 
     
