@@ -13,38 +13,27 @@ import Control.Exception
 import AuthenticationService
 import UserAccountService
 import qualified UserAccount as UA
+import SpecUtils
+import Principal
+import Data.Int
 
-openConnection :: IO Connection
-openConnection = DC.load [DC.Required "test/misc/test.properties"] >>= getConnectionInfo >>= connect 
 
-closeConnection :: Connection -> IO ()
-closeConnection = close  
-
-withDatabaseConnection :: (Connection -> IO ()) -> IO ()
-withDatabaseConnection = bracket openConnection closeConnection
-
-testUserAccount = UA.UserAccount { UA.id = -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False}
-
-withTransactionRollback :: (Connection -> IO n) -> Connection -> IO n
-withTransactionRollback op c = withTransaction c $ do        
-    r <- op c
-    rollback c
-    return r
+testAccount = UA.UserAccount { UA.id = -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False}
 
 spec :: Spec
 spec = do 
     around withDatabaseConnection $ do     
-        describe "Tests for AuthenticationService module" $ do 
-           it "should 0 equals to 0" $ withTransactionRollback $ \c -> do        
-                createUserAccount testUserAccount "123456" c                
-                0 `shouldBe` 0      
-
-getConnectionInfo :: DC_T.Config -> IO ConnectInfo
-getConnectionInfo config = do  
-    key <- DC.require config . T.pack $ "key_path"   
-    host <- DC.require config . T.pack $ "db_host"
-    port <- DC.require config . T.pack $ "db_port"
-    username <- DC.require config . T.pack $ "db_username"
-    password <- getEncryptedProperty config (T.pack "db_password") key         
-    database <- DC.require config . T.pack $ "db_database"
-    return $ ConnectInfo host port username password database
+        describe "Tests for AuthenticationServiceSpec module" $ do 
+           it "should authenticate" $ withTransactionRollback $ \c -> do        
+                let password = hashPassword "123456"
+                query c "INSERT INTO comicspreviews.t_user_account (username, email, enabled, password) VALUES (?, ?, ?, ?) RETURNING id_user_account" (UA.username testAccount, UA.email testAccount, True, password) :: IO [Only Int64]               
+                result <- authenticate "cyclops" "123456" c
+                case result of
+                    Left err -> expectationFailure err
+                    Right principal -> principal `shouldBe` Principal "cyclops" True ""
+           it "should failed with bad credentials" $ withTransactionRollback $ \c -> do        
+                let password = hashPassword "123456"
+                query c "INSERT INTO comicspreviews.t_user_account (username, email, enabled, password) VALUES (?, ?, ?, ?) RETURNING id_user_account" (UA.username testAccount, UA.email testAccount, True, password) :: IO [Only Int64]                               
+                authenticate "cyclops" "wrongPassword" c `shouldReturn` Left "bad credentials"
+           it "should failed with user not found" $ withTransactionRollback $ \c -> do                                        
+                authenticate "cyclops" "wrongPassword" c `shouldReturn` Left "user cyclops not found"                

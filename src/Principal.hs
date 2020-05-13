@@ -10,7 +10,7 @@ data Principal = Principal {
     username :: String,    
     enabled :: Bool,
     password :: String
-} 
+} deriving (Eq)
 
 instance Show Principal where
     show (Principal u e _) = mconcat [show u, "--", show e]

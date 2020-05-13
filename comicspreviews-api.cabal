@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c39afdd74ffa900d12f4264264b4d28387822b28e1bf779d92919c79dc06834f
+-- hash: b118e9412379ac1361619f61bca9559b9668927eacb7ee4e2c41eef613d34b76
 
 name:           comicspreviews-api
 version:        0.1.0.0
@@ -106,6 +106,8 @@ test-suite comicspreviews-api-test
   main-is: Spec.hs
   other-modules:
       AuthenticationServiceSpec
+      SpecUtils
+      UserAccountServiceSpec
       Paths_comicspreviews_api
   hs-source-dirs:
       test
