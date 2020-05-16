@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module UserDAO (    
+module UserAccountDAO (    
     createUserAccount,
     findByUsername
 ) where

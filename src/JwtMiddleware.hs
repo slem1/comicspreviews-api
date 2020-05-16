@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module JwtMiddleware (
-    proxiedApp
+    proxiedApp,
+    hello
  ) where
 
 import Network.Wai
@@ -18,6 +19,10 @@ import qualified Data.ByteString as BS
 import Data.Text
 import Data.Text.Encoding
 
+import qualified AuthenticationService as AuthService
+import Data.Either
+import DataSource
+import qualified Data.ByteString.Char8 as BSC8
 
 
 
@@ -31,7 +36,7 @@ myMiddleware originalApp req send =  originalApp req (\response ->
         addHApplicationJson = (\headers -> headers ++ [(hContentType, "application/json")])
 
 proxiedApp :: Application 
-proxiedApp = jwtAuthMiddleware hello
+proxiedApp = jwtTokenMiddleware hello
 
 jwtAuthMiddleware :: Middleware
 jwtAuthMiddleware baseapp req send = case lookup "auth-token" $ requestHeaders req of
@@ -46,12 +51,36 @@ jwtAuthMiddleware baseapp req send = case lookup "auth-token" $ requestHeaders r
 
 --basicAuth :: CheckCreds -> AuthSettings -> Middleware
 
-basicAuthEntrypoint = basicAuth (\u p -> return $ u == "michael" && p == "mypass") settings
+basicAuthPath = "/auth/login"
+
+basicAuthEntrypoint :: Middleware
+basicAuthEntrypoint = basicAuth authenticate settings
     where          
         settings = "Krakoa" { authIsProtected = \req -> return $ protectedRoute req } :: AuthSettings
         protectedRoute req = case (rawPathInfo req) of
-            "/auth/login" -> True
+            basicAuthPath -> True
             otherwise -> False
+        authenticate username password = do 
+            let u = BSC8.unpack username        
+            result <- openConnection >>= AuthService.authenticate u password
+            case result of 
+                Left err -> putStrLn err >> return False
+                Right p -> return True
+    
+jwtTokenMiddleware :: Middleware
+jwtTokenMiddleware originalApp = jwtReply . basicAuthEntrypoint $ originalApp where
+    jwtReply application req send = application req (\response ->  do        
+        if shouldReturnJWT (responseStatus response) (rawPathInfo req) 
+        then send $ mapResponseHeaders addHApplicationJson response
+        else send $ response)    
+    addHApplicationJson = (\headers -> headers ++ [("custom-jwt-header", "AXXXXX")])
+
+shouldReturnJWT (Status code _) req
+    | code == 200 && req == basicAuthPath = True
+    | otherwise = False
+
+
+
     
 
 

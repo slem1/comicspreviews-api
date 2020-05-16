@@ -22,8 +22,9 @@ import Network.Wai.Handler.Warp
 import Database.PostgreSQL.Simple
 
 import PropertyUtil
-import UserDAO
 import qualified UserAccount as UA
+import qualified UserAccountService as UAS
+import DataSource
 
 around :: IO a -> (a -> IO ()) -> (a -> IO c) -> IO c
 around first last op = do  
@@ -33,15 +34,11 @@ around first last op = do
   last p
   return result
 
-main =  around getLine putStrLn (\input -> putStrLn (input ++ "modified by op"))
-  --do
-  --let user = UA.UserAccount { UA.id= -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False }
-  --DC.load [DC.Required "application.properties"] >>= getConnectionInfo >>= connect >>= findByUsername "Cyclops"
-  
-  
-
-  
-  --run 3300 proxiedApp
+main =  --around getLine putStrLn (\input -> putStrLn (input ++ "modified by op"))
+  do
+  let user = UA.UserAccount { UA.id= -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False }
+  --openConnection >>= (\c -> withTransaction c $ UAS.createUserAccount user "123456" c)
+  run 3300 proxiedApp
  
 {--  scotty 3000 $ do
   middleware $ basicAuth (\u p -> return $ u == "michael" && p == "mypass") "My Realm"
@@ -82,13 +79,3 @@ partJson = do
     article <- jsonData :: ActionM Article
     json article
 
-
-getConnectionInfo :: DC_T.Config -> IO ConnectInfo
-getConnectionInfo config = do  
-    key <- DC.require config . T.pack $ "key_path"   
-    host <- DC.require config . T.pack $ "db_host"
-    port <- DC.require config . T.pack $ "db_port"
-    username <- DC.require config . T.pack $ "db_username"
-    password <- getEncryptedProperty config (T.pack "db_password") key         
-    database <- DC.require config . T.pack $ "db_database"
-    return $ ConnectInfo host port username password database

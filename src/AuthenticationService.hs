@@ -3,7 +3,7 @@ module AuthenticationService (
 ) 
 where
 
-import UserDAO
+import UserAccountDAO
 import Principal
 
 import Database.PostgreSQL.Simple
@@ -11,11 +11,11 @@ import Data.ByteString
 
 
 authenticate :: String -> ByteString -> Connection -> IO (Either String Principal)
-authenticate username rawPassword conn = do
+authenticate username rawPassword conn = let password = hashPassword rawPassword in do    
     mPrincipal <- findByUsername username conn
     return $ case mPrincipal of                                                
         Nothing -> Left . mconcat $ ["user ", username, " not found"]     
-        Just principal -> verifyCredentials principal (hashPassword rawPassword) >>= clearPassword
+        Just principal -> verifyCredentials principal password >>= clearPassword
     where
         clearPassword p = return $ p { password = ""}
 
