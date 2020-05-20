@@ -36,13 +36,13 @@ myMiddleware originalApp req send =  originalApp req (\response ->
         addHApplicationJson = (\headers -> headers ++ [(hContentType, "application/json")])
 
 proxiedApp :: Application 
-proxiedApp = jwtTokenMiddleware hello
+proxiedApp = authMiddleware hello
 
 jwtAuthMiddleware :: Middleware
 jwtAuthMiddleware baseapp req send = case lookup "auth-token" $ requestHeaders req of
     Nothing -> send401
     Just jwt -> do 
-        mJwt <- verifyJwt . decodeUtf8 $ jwt
+        mJwt <- verifyJWT . decodeUtf8 $ jwt
         case mJwt of
             Nothing -> putStrLn "Not verified" >> send401
             _ -> send $ responseBuilder status200 [] "Authorized"
@@ -67,30 +67,39 @@ basicAuthEntrypoint = basicAuth authenticate settings
                 Left err -> putStrLn err >> return False
                 Right p -> return True
     
-jwtTokenMiddleware :: Middleware
-jwtTokenMiddleware originalApp = jwtReply . basicAuthEntrypoint $ originalApp where
-    jwtReply application req send = application req (\response ->  do        
+authMiddleware :: Middleware
+authMiddleware originalApp = jwtMiddleware . basicAuthEntrypoint $ originalApp where
+    jwtMiddleware basicAuthApplication req send = basicAuthApplication req (\response ->  do        
         if shouldReturnJWT (responseStatus response) (rawPathInfo req) 
-        then send $ mapResponseHeaders addHApplicationJson response
-        else send $ response)    
-    addHApplicationJson = (\headers -> headers ++ [("custom-jwt-header", "AXXXXX")])
+        then sendJWT req send response
+        else send $ response)       
+    sendJWT req send response =        
+        let getCredentials req =(lookup hAuthorization $ requestHeaders req) >>= extractBasicAuth            
+            principal = case (getCredentials req) of                
+                Nothing -> error "Cannot extract principal for Authorization header" 
+                Just (username, _) -> decodeUtf8 username 
+            addHJWT token = (\headers -> headers ++ [("auth-token", encodeUtf8 (token))])
+        in do            
+            token <- getJWT $ principal
+            send $ mapResponseHeaders (addHJWT token) response                
 
 shouldReturnJWT (Status code _) req
     | code == 200 && req == basicAuthPath = True
     | otherwise = False
-
-
-
-    
-
-
     
 --demo token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.iLElXhQfr9cSxO2cYTR9wQVTd3_XMNG_pz27z3lbBF8"    
     
-verifyJwt :: Text -> IO (Maybe (JWT VerifiedJWT))     
-verifyJwt jwt = do 
-  config <- DC.load [DC.Required "application.properties"] 
-  secretKeyPath <- DC.require config $ pack "key_path" 
-  jwtSecret <- getEncryptedProperty config (pack "jwt_secret") secretKeyPath
-  let secret = hmacSecret (pack jwtSecret)
+verifyJWT :: Text -> IO (Maybe (JWT VerifiedJWT))     
+verifyJWT jwt = do   
+  jwtSecret <- getJWTSecret
+  let secret = hmacSecret jwtSecret
   return $ decodeAndVerifySignature secret jwt
+
+getJWT :: Text -> IO Text
+getJWT principal = getJWTSecret >>= (\secret -> return $ AuthService.generateJWT secret principal)            
+
+getJWTSecret :: IO Text
+getJWTSecret = do    
+    config <- DC.load [DC.Required "application.properties"] 
+    secretKeyPath <- DC.require config $ pack "key_path" 
+    pack <$> getEncryptedProperty config (pack "jwt_secret") secretKeyPath

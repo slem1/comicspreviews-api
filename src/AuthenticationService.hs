@@ -1,5 +1,7 @@
+{-# LANGUAGE OverloadedStrings #-}
 module AuthenticationService (
-    authenticate
+    authenticate,
+    generateJWT
 ) 
 where
 
@@ -8,6 +10,8 @@ import Principal
 
 import Database.PostgreSQL.Simple
 import Data.ByteString
+import Web.JWT
+import Data.Text
 
 
 authenticate :: String -> ByteString -> Connection -> IO (Either String Principal)
@@ -27,6 +31,16 @@ verifyCredentials principal inputPwd =
     then Right principal 
     else Left "bad credentials"
 
+
+generateJWT :: Text -> Text -> Text
+generateJWT secret principal = 
+    let
+        key = hmacSecret secret 
+        content = mempty {
+            iss =  stringOrURI "comicpreviews-api",
+            sub =  stringOrURI principal
+        }
+    in encodeSigned key mempty content
 
       
  
