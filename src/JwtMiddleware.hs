@@ -47,8 +47,8 @@ jwtAuthMiddleware baseapp req send =
     if path == basicAuthPath
     then baseapp req send
     else case authToken of 
-        Nothing -> send401
-        Just jwt -> (verifyJWT . decodeUtf8 $ jwt) >>= stopOrContinue
+        Nothing -> putStrLn "Token not found" >> send401
+        Just jwt -> putStrLn "JWT verify" >> (verifyJWT . decodeUtf8 $ jwt) >>= stopOrContinue
             
     where
         send401 = send $ responseBuilder status401 [] ""        
@@ -83,9 +83,7 @@ basicAuthEntrypoint :: Middleware
 basicAuthEntrypoint = basicAuth authenticate settings
     where          
         settings = "Krakoa" { authIsProtected = \req -> return $ protectedRoute req } :: AuthSettings
-        protectedRoute req = case (rawPathInfo req) of
-            basicAuthPath -> True
-            otherwise -> False
+        protectedRoute req = (rawPathInfo req) == basicAuthPath             
         authenticate username password = do 
             let u = BSC8.unpack username        
             result <- openConnection >>= AuthService.authenticate u password

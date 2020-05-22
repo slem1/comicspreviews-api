@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module AuthenticationService (
     authenticate,
-    generateJWT
+    generateJWT,
+    getTime
 ) 
 where
 
@@ -12,6 +13,8 @@ import Database.PostgreSQL.Simple
 import Data.ByteString
 import Web.JWT
 import Data.Text
+import Data.Time.Clock.System
+import Data.Time.Clock.POSIX
 
 
 authenticate :: String -> ByteString -> Connection -> IO (Either String Principal)
@@ -43,4 +46,4 @@ generateJWT secret principal =
     in encodeSigned key mempty content
 
       
- 
+getTime = getPOSIXTime >>= \time -> Prelude.putStrLn $ show $ numericDate (time)
