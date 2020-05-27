@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module AuthenticationService (
     authenticate,
-    generateJWT,
-    getTime
+    generateJWT  
 ) 
 where
 
@@ -13,8 +12,7 @@ import Database.PostgreSQL.Simple
 import Data.ByteString
 import Web.JWT
 import Data.Text
-import Data.Time.Clock.System
-import Data.Time.Clock.POSIX
+import Data.Time.Clock
 
 
 authenticate :: String -> ByteString -> Connection -> IO (Either String Principal)
@@ -35,15 +33,14 @@ verifyCredentials principal inputPwd =
     else Left "bad credentials"
 
 
-generateJWT :: Text -> Text -> Text
-generateJWT secret principal = 
+generateJWT :: Text -> Text -> (Maybe NumericDate, Maybe NumericDate ) -> Text
+generateJWT secret principal (time, expiry) = 
     let
         key = hmacSecret secret 
         content = mempty {
             iss =  stringOrURI "comicpreviews-api",
-            sub =  stringOrURI principal
+            sub =  stringOrURI principal,
+            iat = time,
+            Web.JWT.exp = expiry 
         }
     in encodeSigned key mempty content
-
-      
-getTime = getPOSIXTime >>= \time -> Prelude.putStrLn $ show $ numericDate (time)

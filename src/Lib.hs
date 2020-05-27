@@ -1,6 +1,10 @@
 module Lib
-    ( someFunc
-    ) where
+    (
+    ) 
+where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+import Web.JWT
+import Data.Time.Clock.POSIX
+import Data.Time.Clock
+
+

@@ -23,6 +23,9 @@ import qualified AuthenticationService as AuthService
 import Data.Either
 import DataSource
 import qualified Data.ByteString.Char8 as BSC8
+import Lib
+import Data.Time.Clock.POSIX
+import Data.Time.Clock
 
 
 hello :: Application
@@ -71,7 +74,10 @@ basicToJWTMiddleware originalApp = jwtMiddleware . basicAuthEntrypoint $ origina
         in do            
             token <- createJWT $ principal
             send $ mapResponseHeaders (addHJWT token) response                    
-    createJWT principal = getJWTSecret >>= (\secret -> return $ AuthService.generateJWT secret principal)            
+    createJWT principal = do 
+        secret <- getJWTSecret 
+        timeInfo <- getTokenLifeTime (3600 * 4)
+        return $ AuthService.generateJWT secret principal timeInfo            
 
 shouldReturnJWT (Status code _) req
     | code == 200 && req == basicAuthPath = True
@@ -104,3 +110,8 @@ getJWTSecret = do
     config <- DC.load [DC.Required "application.properties"] 
     secretKeyPath <- DC.require config $ pack "key_path" 
     pack <$> getEncryptedProperty config (pack "jwt_secret") secretKeyPath
+
+getTokenLifeTime durationInS = do 
+    time <- getPOSIXTime
+    let exp = time + (secondsToNominalDiffTime durationInS)
+    return $ (numericDate time, numericDate exp) 
