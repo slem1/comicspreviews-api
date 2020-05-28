@@ -42,7 +42,7 @@ proxiedApp = jwtAuthMiddleware . basicToJWTMiddleware $ hello
 
 jwtAuthMiddleware :: Middleware
 jwtAuthMiddleware baseapp req send = 
-    let stopOrContinue mJWT = case mJWT of
+    let guard mJWT = case mJWT of
                 Nothing -> send401
                 _ -> baseapp req send 
         authToken = lookup "auth-token" $ requestHeaders req  
@@ -50,13 +50,14 @@ jwtAuthMiddleware baseapp req send =
     if path == basicAuthPath
     then baseapp req send
     else case authToken of 
-        Nothing -> putStrLn "Token not found" >> send401
-        Just jwt -> putStrLn "JWT verify" >> (verifyJWT . decodeUtf8 $ jwt) >>= stopOrContinue
-            
+        Nothing -> putStrLn "Authentication token not found" >> send401
+        Just jwt -> do 
+            secret <- getJWTSecret  
+            currentTime <- getPOSIXTime'
+            let check = AuthService.verifyJWT secret currentTime $ decodeUtf8 jwt
+            guard $ check
     where
         send401 = send $ responseBuilder status401 [] ""        
-  
---basicAuth :: CheckCreds -> AuthSettings -> Middleware
 
     
 basicToJWTMiddleware :: Middleware
@@ -99,11 +100,6 @@ basicAuthEntrypoint = basicAuth authenticate settings
     
 --demo token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.iLElXhQfr9cSxO2cYTR9wQVTd3_XMNG_pz27z3lbBF8"    
     
-verifyJWT :: Text -> IO (Maybe (JWT VerifiedJWT))     
-verifyJWT jwt = do   
-  jwtSecret <- getJWTSecret
-  let secret = hmacSecret jwtSecret
-  return $ decodeAndVerifySignature secret jwt
 
 getJWTSecret :: IO Text
 getJWTSecret = do    
@@ -115,3 +111,7 @@ getTokenLifeTime durationInS = do
     time <- getPOSIXTime
     let exp = time + (secondsToNominalDiffTime durationInS)
     return $ (numericDate time, numericDate exp) 
+
+getPOSIXTime' :: IO (Maybe NumericDate)
+getPOSIXTime' = getPOSIXTime >>= \time -> return $ numericDate time
+    

@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module AuthenticationService (
     authenticate,
-    generateJWT  
+    generateJWT,
+    verifyJWT
 ) 
 where
 
@@ -44,3 +45,13 @@ generateJWT secret principal (time, expiry) =
             Web.JWT.exp = expiry 
         }
     in encodeSigned key mempty content
+
+verifyJWT :: Text -> Maybe NumericDate -> Text -> Maybe (JWT VerifiedJWT)     
+verifyJWT jwtSecret currentTime jwt = let secret = hmacSecret jwtSecret in do 
+    time <- currentTime    
+    jwt <- decodeAndVerifySignature secret jwt 
+    verifyExpiration time jwt
+    return $ jwt      
+
+verifyExpiration :: NumericDate -> (JWT VerifiedJWT) -> Maybe NumericDate
+verifyExpiration time jwt = (Web.JWT.exp $ claims jwt) >>= \exp -> if time > exp then Nothing else Just exp
