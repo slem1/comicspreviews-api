@@ -17,6 +17,7 @@ import qualified Data.Configurator as DC
 import qualified Data.Configurator.Types as DC_T
 import qualified Data.ByteString as BS
 import Data.Text
+import qualified Data.Text.IO as T_IO
 import Data.Text.Encoding
 
 import qualified AuthenticationService as AuthService
@@ -77,6 +78,7 @@ basicToJWTMiddleware originalApp = jwtMiddleware . basicAuthEntrypoint $ origina
             send $ mapResponseHeaders (addHJWT token) response                    
     createJWT principal = do 
         secret <- getJWTSecret 
+        T_IO.putStrLn secret
         timeInfo <- getTokenLifeTime (3600 * 4)
         return $ AuthService.generateJWT secret principal timeInfo            
 

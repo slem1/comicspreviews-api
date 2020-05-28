@@ -16,7 +16,11 @@ import qualified UserAccount as UA
 import SpecUtils
 import Principal
 import Data.Int
+import Web.JWT
 
+token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjeWNsb3BzIiwiZXhwIjoxNTkwNzAwMzMyLCJpc3MiOiJjb21pY3ByZXZpZXdzLWFwaSIsImlhdCI6MTU5MDY4NTkzMn0.ACgyoFAZP6NsuqUCEu-iR4q8uEM1gav5vhH1QwM-njU"
+invalidSignatureToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjeWNsb3BzIiwiZXhwIjoxNTkwNzAwMzMyLCJpc3MiOiJjb21pY3ByZXZpZXdzLWFwaSIsImlhdCI6MTU5MDY4NTkzMn0.ACgyoFAZP6NsuqUCEu-iR4q8uEM1gav5vhH1QwM-XXX"
+secret = "196C84272D54BB4F9183DACFB8EB2"
 
 testAccount = UA.UserAccount { UA.id = -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False}
 
@@ -36,4 +40,25 @@ spec = do
                 query c "INSERT INTO comicspreviews.t_user_account (username, email, enabled, password) VALUES (?, ?, ?, ?) RETURNING id_user_account" (UA.username testAccount, UA.email testAccount, True, password) :: IO [Only Int64]                               
                 authenticate "cyclops" "wrongPassword" c `shouldReturn` Left "bad credentials"
            it "should failed with user not found" $ withTransactionRollback $ \c -> do                                        
-                authenticate "cyclops" "wrongPassword" c `shouldReturn` Left "user cyclops not found"                
+                authenticate "cyclops" "wrongPassword" c `shouldReturn` Left "user cyclops not found"      
+    describe "Tests for AuthenticationServiceSpec module" $ do                 
+           it "should valid JWT" $ do 
+                let jwt = verifyJWT secret (numericDate 1590683897) token in
+                     case jwt of
+                          Nothing -> expectationFailure $ (show jwt) ++ " is invalid"
+                          Just _ -> return ()
+           it "should invalid JWT signature" $ do 
+                let jwt = verifyJWT secret (numericDate 1590683897) invalidSignatureToken in
+                     case jwt of
+                          Nothing -> return ()
+                          _ -> expectationFailure $ (show jwt) ++ " is valid"
+           it "should invalid JWT due to expiration" $ do 
+                let jwt = verifyJWT secret (numericDate 1590700333) token in
+                     case jwt of
+                          Nothing -> return ()
+                          _ -> expectationFailure $ (show jwt) ++ " is valid"    
+                     
+                       
+
+
+                    

@@ -2,7 +2,8 @@
 module AuthenticationService (
     authenticate,
     generateJWT,
-    verifyJWT
+    verifyJWT,
+    verifyExpiration
 ) 
 where
 
@@ -47,10 +48,10 @@ generateJWT secret principal (time, expiry) =
     in encodeSigned key mempty content
 
 verifyJWT :: Text -> Maybe NumericDate -> Text -> Maybe (JWT VerifiedJWT)     
-verifyJWT jwtSecret currentTime jwt = let secret = hmacSecret jwtSecret in do 
-    time <- currentTime    
-    jwt <- decodeAndVerifySignature secret jwt 
-    verifyExpiration time jwt
+verifyJWT jwtSecret currentTime token = let secret = hmacSecret jwtSecret in do 
+    time <- currentTime        
+    jwt <- decodeAndVerifySignature secret token
+    verifyExpiration time jwt         
     return $ jwt      
 
 verifyExpiration :: NumericDate -> (JWT VerifiedJWT) -> Maybe NumericDate
