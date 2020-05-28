@@ -17,7 +17,8 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-15.9
+# resolver: lts-15.9
+resolver: lts-15.14
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -62,6 +63,8 @@ extra-deps:
   - base64-bytestring-1.0.0.3
   - wai-3.2.2.1
   - warp-3.3.10
+  - hlint-2.2.11
+  - brittany-0.12.1.1
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
