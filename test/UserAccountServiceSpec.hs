@@ -17,9 +17,9 @@ import SpecUtils
 testUserAccount = UA.UserAccount { UA.id = -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False}
 
 spec :: Spec
-spec = do 
-    around withDatabaseConnection $ do     
-        describe "Tests for UserAccountService module" $ do 
+spec =  
+    around withDatabaseConnection $      
+        describe "Tests for UserAccountService module" $  
            it "should create account" $ withTransactionRollback $ \c -> do        
                 createUserAccount testUserAccount "123456" c           
                 us <- query c "SELECT username, email, enabled FROM comicspreviews.t_user_account WHERE username = ?" (Only (UA.username testUserAccount)) :: IO [(String, String, Bool)]                     

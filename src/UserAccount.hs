@@ -1,15 +1,14 @@
-module UserAccount(
-    UserAccount(..)
-)
-
+module UserAccount
+  ( UserAccount(..)
+  )
 where
 
-import Data.Int
-import Data.Monoid
+import           Data.Int
+import           Data.Monoid
 
 data UserAccount = UserAccount {
     id :: Int64,
     username :: String,
     email :: String,
-    enabled :: Bool    
+    enabled :: Bool
 } deriving (Show)

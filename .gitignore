@@ -4,3 +4,4 @@ comicspreviews-parser.cabal
 *.lock
 *.log
 *.key
+report.html
