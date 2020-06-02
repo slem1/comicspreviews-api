@@ -86,8 +86,7 @@ basicToJWTMiddleware =
         token <- createJWT principal
         send $ mapResponseHeaders (addHJWT token) response
   createJWT principal = do
-    secret <- getJWTSecret
-    T_IO.putStrLn secret
+    secret <- getJWTSecret    
     timeInfo <- getTokenLifeTime (3600 * 4)
     return $ AuthService.generateJWT secret principal timeInfo
 
@@ -108,8 +107,6 @@ basicAuthEntrypoint = basicAuth authenticate settings
     case result of
       Left  err -> putStrLn err >> return False
       Right p   -> return True
-
---demo token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.iLElXhQfr9cSxO2cYTR9wQVTd3_XMNG_pz27z3lbBF8"    
 
 
 getJWTSecret :: IO Text
