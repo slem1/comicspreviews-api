@@ -10,9 +10,11 @@ import Test.HUnit
 import Database.PostgreSQL.Simple
 import PropertyUtil
 import Control.Exception
-import UserAccountService
-import qualified UserAccount as UA
+
 import SpecUtils
+
+import Service.UserAccountService
+import qualified Model.UserAccount as UA
 
 testUserAccount = UA.UserAccount { UA.id = -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False}
 

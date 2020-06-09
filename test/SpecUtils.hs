@@ -10,11 +10,12 @@ import Control.Monad.Trans.Reader
 import Test.Hspec
 import Test.HUnit
 import Database.PostgreSQL.Simple
-import PropertyUtil
 import Control.Exception
-import AuthenticationService
-import UserAccountService
-import qualified UserAccount as UA
+
+import Auth.AuthenticationService
+import Service.UserAccountService
+import qualified Model.UserAccount as UA
+import PropertyUtil
 
 openConnection :: IO Connection
 openConnection = DC.load [DC.Required "test/misc/test.properties"] >>= getConnectionInfo >>= connect 

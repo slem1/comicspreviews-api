@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 02797c5e1d6cb9bb85cddafdaffe028720f9a0a4c5d81793b62a84310e605310
+-- hash: bbf60f5076471f9fbb9014650793447ba40ef046471733242fe024b8abe7b30c
 
 name:           comicspreviews-api
 version:        0.1.0.0
@@ -27,20 +27,19 @@ source-repository head
 
 library
   exposed-modules:
-      Article
-      AuthenticationService
-      ComicDAO
-      ComicService
+      Auth.AuthenticationService
+      Auth.JwtMiddleware
+      Auth.Principal
       Crypto
+      DAO.ComicDAO
+      DAO.UserAccountDAO
+      DAO.UserComicDAO
       DataSource
-      JwtMiddleware
-      Lib
-      Principal
+      Model.Article
+      Model.UserAccount
       PropertyUtil
-      UserAccount
-      UserAccountDAO
-      UserAccountService
-      UserComicDAO
+      Service.ComicService
+      Service.UserAccountService
   other-modules:
       Paths_comicspreviews_api
   hs-source-dirs:

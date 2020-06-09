@@ -1,9 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Lib
-import Article
-import JwtMiddleware
 
 import Web.Scotty
 import Network.HTTP.Types.Status
@@ -22,8 +19,10 @@ import Network.Wai.Handler.Warp
 import Database.PostgreSQL.Simple
 
 import PropertyUtil
-import qualified UserAccount as UA
-import qualified UserAccountService as UAS
+import Model.Article
+import Auth.JwtMiddleware
+import qualified Model.UserAccount as UA
+import qualified Service.UserAccountService as UAS
 import DataSource
 
 around :: IO a -> (a -> IO ()) -> (a -> IO c) -> IO c

@@ -10,13 +10,16 @@ import Test.HUnit
 import Database.PostgreSQL.Simple
 import PropertyUtil
 import Control.Exception
-import AuthenticationService
-import UserAccountService
-import qualified UserAccount as UA
+
+
 import SpecUtils
-import Principal
 import Data.Int
 import Web.JWT
+
+import Auth.Principal
+import qualified Model.UserAccount as UA
+import Auth.AuthenticationService
+import Service.UserAccountService
 
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjeWNsb3BzIiwiZXhwIjoxNTkwNzAwMzMyLCJpc3MiOiJjb21pY3ByZXZpZXdzLWFwaSIsImlhdCI6MTU5MDY4NTkzMn0.ACgyoFAZP6NsuqUCEu-iR4q8uEM1gav5vhH1QwM-njU"
 invalidSignatureToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjeWNsb3BzIiwiZXhwIjoxNTkwNzAwMzMyLCJpc3MiOiJjb21pY3ByZXZpZXdzLWFwaSIsImlhdCI6MTU5MDY4NTkzMn0.ACgyoFAZP6NsuqUCEu-iR4q8uEM1gav5vhH1QwM-XXX"

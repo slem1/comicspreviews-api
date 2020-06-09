@@ -8,13 +8,17 @@ import Control.Monad.Trans.Reader
 import Test.Hspec
 import Test.HUnit
 import Database.PostgreSQL.Simple
-import PropertyUtil
+
 import Control.Exception
 import SpecUtils
 import Data.Int
-import qualified UserAccount as UA
-import ComicService
+
+
 import Data.Time.Calendar
+
+import Service.ComicService
+import qualified Model.UserAccount as UA
+import PropertyUtil
 
 testAccount = UA.UserAccount { UA.id = -1, UA.username = "wolverine", UA.email = "wolverine@krakoa.com", UA.enabled = False}
 
