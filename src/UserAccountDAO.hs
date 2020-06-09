@@ -17,7 +17,7 @@ createUserAccount acc password conn = do
   [rid] <-
     query
       conn
-      "INSERT INTO comicspreviews.t_user_account (username, email, enabled, password) VALUES (?, ?, ?, ?) RETURNING id_user_account"
+      "INSERT INTO comicspreviews.t_user_account (username, email, enabled, password) VALUES (?, ?, ?, ?) RETURNING id_t_user_account"
       (UA.username acc, UA.email acc, True, password) :: IO [Only Int64]
   return $ acc { UA.id = fromOnly rid, UA.enabled = True }
 

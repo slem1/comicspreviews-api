@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b18dad205632ecd1659dd080d7c8fd3d0b06f4f7cc40dd7b801a99ee6200d6f1
+-- hash: 02797c5e1d6cb9bb85cddafdaffe028720f9a0a4c5d81793b62a84310e605310
 
 name:           comicspreviews-api
 version:        0.1.0.0
@@ -29,6 +29,8 @@ library
   exposed-modules:
       Article
       AuthenticationService
+      ComicDAO
+      ComicService
       Crypto
       DataSource
       JwtMiddleware
@@ -38,6 +40,7 @@ library
       UserAccount
       UserAccountDAO
       UserAccountService
+      UserComicDAO
   other-modules:
       Paths_comicspreviews_api
   hs-source-dirs:
@@ -107,8 +110,10 @@ test-suite comicspreviews-api-test
   main-is: Spec.hs
   other-modules:
       AuthenticationServiceSpec
+      ComicServiceSpec
       SpecUtils
       UserAccountServiceSpec
+      UserComicDAOSpec
       Paths_comicspreviews_api
   hs-source-dirs:
       test

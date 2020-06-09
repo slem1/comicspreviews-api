@@ -28,8 +28,7 @@ import DataSource
 
 around :: IO a -> (a -> IO ()) -> (a -> IO c) -> IO c
 around first last op = do  
-  p <- first 
-  putStrLn "after first"
+  p <- first   
   result <- op p
   last p
   return result

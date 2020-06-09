@@ -30,14 +30,14 @@ spec = do
         describe "Tests for AuthenticationServiceSpec module" $ do 
            it "should authenticate" $ withTransactionRollback $ \c -> do        
                 let password = hashPassword "123456"
-                query c "INSERT INTO comicspreviews.t_user_account (username, email, enabled, password) VALUES (?, ?, ?, ?) RETURNING id_user_account" (UA.username testAccount, UA.email testAccount, True, password) :: IO [Only Int64]               
+                query c "INSERT INTO comicspreviews.t_user_account (username, email, enabled, password) VALUES (?, ?, ?, ?) RETURNING id_t_user_account" (UA.username testAccount, UA.email testAccount, True, password) :: IO [Only Int64]               
                 result <- authenticate "cyclops" "123456" c
                 case result of
                     Left err -> expectationFailure err
                     Right principal -> principal `shouldBe` Principal "cyclops" True ""
            it "should failed with bad credentials" $ withTransactionRollback $ \c -> do        
                 let password = hashPassword "123456"
-                query c "INSERT INTO comicspreviews.t_user_account (username, email, enabled, password) VALUES (?, ?, ?, ?) RETURNING id_user_account" (UA.username testAccount, UA.email testAccount, True, password) :: IO [Only Int64]                               
+                query c "INSERT INTO comicspreviews.t_user_account (username, email, enabled, password) VALUES (?, ?, ?, ?) RETURNING id_t_user_account" (UA.username testAccount, UA.email testAccount, True, password) :: IO [Only Int64]                               
                 authenticate "cyclops" "wrongPassword" c `shouldReturn` Left "bad credentials"
            it "should failed with user not found" $ withTransactionRollback $ \c ->                                         
                 authenticate "cyclops" "wrongPassword" c `shouldReturn` Left "user cyclops not found"      
