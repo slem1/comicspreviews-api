@@ -25,23 +25,14 @@ import qualified Model.UserAccount as UA
 import qualified Service.UserAccountService as UAS
 import DataSource
 
-around :: IO a -> (a -> IO ()) -> (a -> IO c) -> IO c
-around first last op = do  
-  p <- first   
-  result <- op p
-  last p
-  return result
-
-main =  --around getLine putStrLn (\input -> putStrLn (input ++ "modified by op"))
-  do
-  let user = UA.UserAccount { UA.id= -1, UA.username = "cyclops", UA.email = "cyclops@krakoa.com", UA.enabled = False }
-  --openConnection >>= (\c -> withTransaction c $ UAS.createUserAccount user "123456" c)
-  run 3300 proxiedApp
+main = scotty 3000 $ do 
+  middleware authMiddleware
+  get "/" $ do     
+    text "This was a GET request!"     
  
 {--  scotty 3000 $ do
   middleware $ basicAuth (\u p -> return $ u == "michael" && p == "mypass") "My Realm"
-  get "/" $ do     
-    text "This was a GET request!"     
+  
   delete "/" $ do
     html "This was a DELETE request!"  
   post "/" $ do
