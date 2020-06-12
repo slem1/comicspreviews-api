@@ -65,6 +65,7 @@ extra-deps:
   - warp-3.3.10
   - hlint-2.2.11
   - brittany-0.12.1.1
+  - containers-0.6.2.1
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

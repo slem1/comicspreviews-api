@@ -43,6 +43,7 @@ dependencies:
 - base64-bytestring
 - wai
 - warp
+- containers
 
 library:
   source-dirs: src

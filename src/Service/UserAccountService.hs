@@ -1,5 +1,6 @@
 module Service.UserAccountService
-  ( createUserAccount
+  ( createUserAccount,
+    getByUsername
   )
 where
 
@@ -13,4 +14,8 @@ createUserAccount :: UserAccount -> ByteString -> Connection -> IO UserAccount
 createUserAccount account rawPassword conn =
   let password = hashPassword rawPassword
   in  UADAO.createUserAccount account password conn
+
+getByUsername :: String -> Connection -> IO (Maybe UserAccount)
+getByUsername = UADAO.findByUsername'
+
 

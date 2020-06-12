@@ -15,6 +15,10 @@ import           Data.ByteString
 import           Web.JWT
 import           Data.Text
 import           Data.Time.Clock
+import qualified Data.Map.Strict as Map
+import qualified Data.Aeson.Types as AesonTypes
+
+import qualified Model.UserAccount as UserAccount
 
 
 authenticate
@@ -31,19 +35,23 @@ authenticate username rawPassword conn =
 
 
 verifyCredentials :: Principal -> String -> Either String Principal
-verifyCredentials (Principal _ False _) _ = Left "user is inactive"
+verifyCredentials (Principal _ _ False _) _ = Left "user is inactive"
 verifyCredentials principal inputPwd = if password principal == inputPwd
   then Right principal
   else Left "bad credentials"
 
 
-generateJWT :: Text -> Text -> (Maybe NumericDate, Maybe NumericDate) -> Text
-generateJWT secret principal (time, expiry) =
-  let key     = hmacSecret secret
+generateJWT :: Text -> UserAccount.UserAccount -> (Maybe NumericDate, Maybe NumericDate) -> Text
+generateJWT secret user (time, expiry) =
+  let uid = Data.Text.pack . show $ UserAccount.id user  
+      username = AesonTypes.String . Data.Text.pack  $ UserAccount.username user
+      additionalClaims = ClaimsMap $ Map.singleton (Data.Text.pack "username") username
+      key     = hmacSecret secret
       content = mempty { iss         = stringOrURI "comicpreviews-api"
-                       , sub         = stringOrURI principal
+                       , sub         = stringOrURI uid
                        , iat         = time
                        , Web.JWT.exp = expiry
+                       , unregisteredClaims = additionalClaims
                        }
   in  encodeSigned key mempty content
 

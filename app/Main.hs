@@ -27,9 +27,18 @@ import DataSource
 
 main = scotty 3000 $ do 
   middleware authMiddleware
-  get "/" $ do     
-    text "This was a GET request!"     
+  get "/auth/login" (status status200)
+  {-- get "/user/:uid/comics" $ do
+    mJwt <- header "auth-token" 
+    case mJwt of
+      Nothing -> raiseStatus status401 "Unauthenticated user"
+      Just jwt -> let mSubject = sub (claims jwt) in do --}
+        
+
+    
  
+
+
 {--  scotty 3000 $ do
   middleware $ basicAuth (\u p -> return $ u == "michael" && p == "mypass") "My Realm"
   

@@ -20,12 +20,14 @@ import           Data.Text
 import qualified Data.Text.IO                  as T_IO
 import           Data.Text.Encoding
 
-import qualified Auth.AuthenticationService         as AuthService
 import           Data.Either
 import           DataSource
 import qualified Data.ByteString.Char8         as BSC8
 import           Data.Time.Clock.POSIX
 import           Data.Time.Clock
+
+import qualified Auth.AuthenticationService         as AuthService
+import qualified Service.UserAccountService         as UserAccountService
 
 
 authMiddleware :: Middleware
@@ -65,18 +67,19 @@ basicToJWTMiddleware =
     let
       getCredentials req =
         lookup hAuthorization (requestHeaders req) >>= extractBasicAuth
-      principal = case getCredentials req of
+      username = case getCredentials req of
         Nothing -> error "Cannot extract principal for Authorization header"
-        Just (username, _) -> decodeUtf8 username
+        Just (username', _) -> unpack $ decodeUtf8 username'
       addHJWT token headers = headers ++ [("auth-token", encodeUtf8 token)]
     in
       do
-        token <- createJWT principal
+        Just user <- openConnection >>= UserAccountService.getByUsername username
+        token <- createJWT user        
         send $ mapResponseHeaders (addHJWT token) response
-  createJWT principal = do
+  createJWT user = do
     secret <- getJWTSecret    
-    timeInfo <- getTokenLifeTime (3600 * 4)
-    return $ AuthService.generateJWT secret principal timeInfo
+    timeInfo <- getTokenLifeTime (3600 * 4)    
+    return $ AuthService.generateJWT secret user timeInfo
 
 shouldReturnJWT (Status code _) req | code == 200 && req == basicAuthPath = True
                                     | otherwise = False

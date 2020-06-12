@@ -3,6 +3,7 @@
 module DAO.UserAccountDAO
   ( createUserAccount
   , findByUsername
+  , findByUsername'
   )
 where
 
@@ -26,10 +27,23 @@ findByUsername username conn = do
   us <-
     query
       conn
-      "SELECT username, enabled, password FROM comicspreviews.t_user_account WHERE username = ?"
-      (Only username) :: IO [Maybe (String, Bool, String)]
+      "SELECT id_t_user_account, username, enabled, password FROM comicspreviews.t_user_account WHERE username = ?"
+      (Only username) :: IO [Maybe (Int64, String, Bool, String)]
   case us of
     []  -> return Nothing
     [u] -> return $ mapper <$> u
  where
-  mapper (username, enabled, password) = P.Principal username enabled password
+  mapper (uid, username, enabled, password) = P.Principal uid username enabled password
+
+findByUsername' :: String -> Connection -> IO (Maybe UA.UserAccount)
+findByUsername' username conn = do
+  us <-
+    query
+      conn
+      "SELECT id_t_user_account, username, email, enabled FROM comicspreviews.t_user_account WHERE username = ?"
+      (Only username) :: IO [Maybe (Int64, String, String, Bool)]
+  case us of
+    []  -> return Nothing
+    [u] -> return $ mapper <$> u
+ where
+  mapper (uid, username, email, enabled) = UA.UserAccount uid username email enabled 
