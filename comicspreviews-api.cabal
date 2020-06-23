@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4c6067ff16e148eb7f6a02abb0f8e59163707b9f4c0b361a551e9e63cd2fa4e3
+-- hash: d405496bed598295dcd509a6f0c8432b02fee892e82e122f6add44bc635ec77f
 
 name:           comicspreviews-api
 version:        0.1.0.0
@@ -37,6 +37,7 @@ library
       DataSource
       Demo
       Model.Article
+      Model.Comic
       Model.UserAccount
       PropertyUtil
       Service.ComicService

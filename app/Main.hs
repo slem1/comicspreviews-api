@@ -11,32 +11,49 @@ import Data.Configurator.Types as DC_T
 
 import Data.Monoid (mconcat)
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
+import Control.Monad.IO.Class
 
 import Data.ByteString.UTF8
 import Web.JWT
 
 import Network.Wai.Handler.Warp
 import Database.PostgreSQL.Simple
+import Data.Time.Calendar
+import Data.Int
 
 import PropertyUtil
 import Model.Article
 import Auth.JwtMiddleware
 import qualified Model.UserAccount as UA
 import qualified Service.UserAccountService as UAS
+import qualified Service.ComicService as ComicService
 import DataSource
+
 
 main = scotty 3000 $ do 
   middleware authMiddleware
   get "/auth/login" (status status200)
-  {-- get "/user/:uid/comics" $ do
-    mJwt <- header "auth-token" 
-    case mJwt of
-      Nothing -> raiseStatus status401 "Unauthenticated user"
-      Just jwt -> let mSubject = sub (claims jwt) in do --}
-        
+  get "/user/:uid/comics" $ uidAcl $ do 
+    uid <- param "uid" :: ActionM Int64
+    result <- liftIO $ do
+      c <- openConnection 
+      comics <- ComicService.getUserComics uid (fromGregorian 2020 3 4) Nothing c            
+      return comics
+    text $ TL.pack $ show result
 
-    
- 
+
+uidAcl :: ActionM () -> ActionM ()
+uidAcl action = do  
+  uid <- param "uid" :: ActionM T.Text
+  Just jwt <- Web.Scotty.header "auth-token"         
+  let Just decodeJwt = Web.JWT.decode (TL.toStrict jwt)
+      Just userId = stringOrURIToText <$> sub (claims decodeJwt) in 
+      if uid == userId 
+        then action
+        else status status403 
+
+
 
 
 {--  scotty 3000 $ do
