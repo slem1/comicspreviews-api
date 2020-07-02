@@ -70,7 +70,8 @@ basicToJWTMiddleware =
       username = case getCredentials req of
         Nothing -> error "Cannot extract principal for Authorization header"
         Just (username', _) -> unpack $ decodeUtf8 username'
-      addHJWT token headers = headers ++ [("auth-token", encodeUtf8 token)]
+      asCookie token = encodeUtf8 (mconcat ["auth-token=" ,token])
+      addHJWT token headers = headers ++ [("Set-Cookie", asCookie token )]
     in
       do
         Just user <- openConnection >>= UserAccountService.getByUsername username

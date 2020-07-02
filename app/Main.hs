@@ -38,9 +38,8 @@ main = scotty 3000 $ do
     uid <- param "uid" :: ActionM Int64
     result <- liftIO $ do
       c <- openConnection 
-      comics <- ComicService.getUserComics uid (fromGregorian 2020 3 4) Nothing c            
-      return comics
-    text $ TL.pack $ show result
+      ComicService.getUserComics uid (fromGregorian 2020 3 4) Nothing c                  
+    json result
 
 
 uidAcl :: ActionM () -> ActionM ()
